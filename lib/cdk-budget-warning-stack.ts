@@ -1,16 +1,24 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { CostBudgetWarning } from './constructs/budget-construct';
 
 export class CdkBudgetWarningStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    // create SNS topic for budget warning
+    const topic =  new Topic(this, 'MonthlyCostBudgetWarningTopic', {
+      displayName: 'Monthly Cost Budget Warning Topic',
+      topicName: 'MonthlyCostBudgetWarningTopic',
+  });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'CdkBudgetWarningQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    // create budget warning 
+    const budgetWarning = new CostBudgetWarning(this, 'Budget-Warning', {
+      name: 'MonthlyCostBudgetWarning',
+      limitAmount: 10,
+      snsTopicArn: topic.topicArn,
+    });
+
   }
 }
